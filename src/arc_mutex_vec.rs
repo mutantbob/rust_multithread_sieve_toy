@@ -1,35 +1,27 @@
 use crate::divisible_by_any;
 use crate::interleave;
-use std::sync::{mpsc, Arc, Mutex};
+use std::sync::{Arc, Mutex};
 use std::thread;
 
 /*
-The strategy for this one is to pass an Arc::clone to the thread.
+The strategy for this one is to pass an Arc::clone to the thread for it to lock and use.
 */
 pub fn seive_multithreaded_1(max: i32) -> Vec<i32> {
-    let (tx, rx) = mpsc::channel();
     let thread_count = 4;
     let primes: Vec<Arc<Mutex<Vec<i32>>>> = (0..thread_count)
         .map(|_i| Arc::new(Mutex::new(vec![])))
         .collect();
     let mut carousel = 0;
     for i in 2..max {
+        let mut join_handles = Vec::new();
         for chunk in &primes {
-            let tx2 = mpsc::Sender::clone(&tx);
             let p2 = Arc::clone(chunk);
-            thread::spawn(move || {
-                let result = divisible_by_any(i, &p2.lock().unwrap());
-                tx2.send(result).unwrap();
-            });
+            let handle = thread::spawn(move || divisible_by_any(i, &p2.lock().unwrap()));
+            join_handles.push(handle);
         }
 
-        let mut any = false;
-        for _i in 0..primes.len() {
-            let result = rx.recv().unwrap();
-            if result {
-                any = true
-            }
-        }
+        let any = join_handles.into_iter().any(|h| h.join().unwrap());
+
         if !any {
             primes[carousel].lock().unwrap().push(i);
 
