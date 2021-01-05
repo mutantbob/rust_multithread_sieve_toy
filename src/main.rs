@@ -5,9 +5,7 @@ use crate::arc_mutex_vec::seive_multithreaded_1;
 use crate::arc_mutex_vec_interruptible::seive_multithreaded_arc_interruptible;
 use crate::move_box_vec::seive_multithreaded_2;
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::mpsc;
-use std::thread;
-use std::time::{Duration, Instant};
+use std::time::Instant;
 
 mod arc_mutex_vec;
 mod arc_mutex_vec_interruptible;
@@ -22,6 +20,7 @@ fn divisible_by_any(candidate: i32, divisors: &[i32]) -> bool {
     false
 }
 
+#[allow(clippy::verbose_bit_mask)]
 fn divisible_by_any_interruptible(
     candidate: i32,
     divisors: &[i32],
@@ -123,57 +122,4 @@ fn seive_single_threaded(max_to_check: i32) -> Vec<i32> {
     }
 
     primes
-}
-
-fn example4() {
-    let (tx, rx) = mpsc::channel();
-    thread::spawn(move || {
-        let vals = vec![
-            String::from("hi"),
-            String::from("from"),
-            String::from("the"),
-            String::from("thread"),
-        ];
-
-        for val in vals {
-            tx.send(val).unwrap();
-            thread::sleep(Duration::from_secs(1));
-        }
-    });
-    for received in rx {
-        println!("Got: {}", received);
-    }
-}
-
-fn example3() {
-    let (tx, rx) = mpsc::channel();
-    thread::spawn(move || {
-        let val = String::from("hi");
-        tx.send(val).unwrap();
-        //println!("val is {}", val);
-    });
-    let received = rx.recv().unwrap();
-    println!("Got: {}", received);
-}
-
-fn example2() {
-    let v = vec![1, 2, 3];
-    let handle = thread::spawn(move || {
-        println!("Here's a vector: {:?}", v);
-    });
-    handle.join().unwrap();
-}
-
-fn example1() {
-    let handle = thread::spawn(|| {
-        for i in 1..10 {
-            println!("hi number {} from the spawned thread!", i);
-            thread::sleep(Duration::from_millis(1));
-        }
-    });
-    for i in 1..5 {
-        println!("hi number {} from the main thread!", i);
-        thread::sleep(Duration::from_millis(1));
-    }
-    handle.join().unwrap();
 }
