@@ -5,7 +5,8 @@ use std::thread;
 /// to the thread and receive it back with
 /// the results and put it back in the `primes` array ready for the next iteration
 pub fn sieve_multithreaded_2(max: i32) -> Vec<i32> {
-    let mut primes: Vec<Option<Box<Vec<i32>>>> = (0..2).map(|_i| Some(Box::new(vec![]))).collect();
+    let thread_count=4;
+    let mut primes: Vec<Option<Box<Vec<i32>>>> = (0..thread_count).map(|_i| Some(Box::new(vec![]))).collect();
     {
         let mut carousel = 0;
         for candidate in 2..max {
