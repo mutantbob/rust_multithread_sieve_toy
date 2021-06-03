@@ -2,11 +2,9 @@ use crate::divisible_by_any_interruptible;
 use crate::interleave;
 use std::sync::atomic::AtomicBool;
 use std::sync::{Arc, Mutex};
-use std::{mem, thread};
+use std::thread;
 
-/*
-The strategy for this one is to pass an Arc::clone to the thread.
-*/
+///The strategy for this one is to pass an Arc::clone to the thread.
 pub fn seive_multithreaded_arc_interruptible(max: i32) -> Vec<i32> {
     let thread_count = 4;
     let primes: Vec<Arc<Mutex<Vec<i32>>>> = (0..thread_count)
@@ -26,7 +24,10 @@ pub fn seive_multithreaded_arc_interruptible(max: i32) -> Vec<i32> {
             join_handles.push(handle);
         }
 
-        let any = join_handles.into_iter().any(|h| h.join().unwrap());
+        let any = join_handles
+            .into_iter()
+            //.any(|h| h.join().unwrap()) // fails to consume all the JoinHandles leading to a failure during try_unwrap()
+            .fold(false, |accum, h| accum | h.join().unwrap());
 
         if !any {
             primes[carousel].lock().unwrap().push(i);
@@ -37,11 +38,7 @@ pub fn seive_multithreaded_arc_interruptible(max: i32) -> Vec<i32> {
             }
         }
     }
-    let mut tmp: Vec<Vec<i32>> = Vec::new();
-    for chunk in primes {
-        tmp.push(mem::replace(chunk.lock().unwrap().as_mut(), Vec::new()))
-        // すみません
-    }
+    let tmp: Vec<Vec<i32>> = crate::unwrap_vec_arc_mutex(primes);
 
     interleave(&tmp)
 }

@@ -3,9 +3,7 @@ use crate::interleave;
 use std::sync::{Arc, Mutex};
 use std::thread;
 
-/*
-The strategy for this one is to pass an Arc::clone to the thread for it to lock and use.
-*/
+///The strategy for this one is to pass an Arc::clone to the thread for it to lock and use.
 pub fn seive_multithreaded_1(max: i32) -> Vec<i32> {
     let thread_count = 4;
     let primes: Vec<Arc<Mutex<Vec<i32>>>> = (0..thread_count)
@@ -20,7 +18,10 @@ pub fn seive_multithreaded_1(max: i32) -> Vec<i32> {
             join_handles.push(handle);
         }
 
-        let any = join_handles.into_iter().any(|h| h.join().unwrap());
+        let any = join_handles
+            .into_iter()
+            //.any(|h| h.join().unwrap()) // this doesn't consume all the JoinHandles and causes try_unwrap() to fail later
+            .fold(false, |accum, h| accum | h.join().unwrap());
 
         if !any {
             primes[carousel].lock().unwrap().push(i);
@@ -31,10 +32,8 @@ pub fn seive_multithreaded_1(max: i32) -> Vec<i32> {
             }
         }
     }
-    let mut tmp: Vec<Vec<i32>> = Vec::new();
-    for chunk in primes {
-        tmp.push(chunk.lock().unwrap().clone())
-    }
+
+    let tmp: Vec<Vec<i32>> = crate::unwrap_vec_arc_mutex(primes);
 
     interleave(&tmp)
 }

@@ -5,6 +5,7 @@ use crate::arc_mutex_vec::seive_multithreaded_1;
 use crate::arc_mutex_vec_interruptible::seive_multithreaded_arc_interruptible;
 use crate::move_box_vec::seive_multithreaded_2;
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::{Arc, Mutex};
 use std::time::Instant;
 
 mod arc_mutex_vec;
@@ -122,4 +123,11 @@ fn seive_single_threaded(max_to_check: i32) -> Vec<i32> {
     }
 
     primes
+}
+
+pub fn unwrap_vec_arc_mutex(primes: Vec<Arc<Mutex<Vec<i32>>>>) -> Vec<Vec<i32>> {
+    primes
+        .into_iter()
+        .map(|p| Arc::try_unwrap(p).unwrap().into_inner().unwrap())
+        .collect()
 }
