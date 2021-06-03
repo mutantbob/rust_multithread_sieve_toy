@@ -74,6 +74,14 @@ fn main() {
         }
         {
             let start = Instant::now();
+
+            let primes = sieve_multithreaded_2(end);
+            let elapsed = start.elapsed();
+            println!("{} primes; last={}", primes.len(), primes.last().unwrap());
+            println!("MT2 elapsed = {:?}", elapsed);
+        }
+        {
+            let start = Instant::now();
             let primes = sieve_multithreaded_arc_interruptible(end);
             let elapsed = start.elapsed();
             println!("{} primes; last={}", primes.len(), primes.last().unwrap());
