@@ -4,7 +4,7 @@ use std::thread;
 /// The strategy in this one is to pass a `Box<Vec<i32>>`
 /// to the thread and receive it back with
 /// the results and put it back in the `primes` array ready for the next iteration
-pub fn seive_multithreaded_2(max: i32) -> Vec<i32> {
+pub fn sieve_multithreaded_2(max: i32) -> Vec<i32> {
     let mut primes: Vec<Option<Box<Vec<i32>>>> = (0..2).map(|_i| Some(Box::new(vec![]))).collect();
     {
         let mut carousel = 0;

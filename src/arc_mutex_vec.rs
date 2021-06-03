@@ -4,7 +4,7 @@ use std::sync::{Arc, Mutex};
 use std::thread;
 
 ///The strategy for this one is to pass an Arc::clone to the thread for it to lock and use.
-pub fn seive_multithreaded_1(max: i32) -> Vec<i32> {
+pub fn sieve_multithreaded_1(max: i32) -> Vec<i32> {
     let thread_count = 4;
     let primes: Vec<Arc<Mutex<Vec<i32>>>> = (0..thread_count)
         .map(|_i| Arc::new(Mutex::new(vec![])))

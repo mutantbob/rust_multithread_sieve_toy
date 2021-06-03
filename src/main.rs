@@ -1,9 +1,9 @@
 //#[macro_use]
 //extern crate interleave;
 
-use crate::arc_mutex_vec::seive_multithreaded_1;
-use crate::arc_mutex_vec_interruptible::seive_multithreaded_arc_interruptible;
-use crate::move_box_vec::seive_multithreaded_2;
+use crate::arc_mutex_vec::sieve_multithreaded_1;
+use crate::arc_mutex_vec_interruptible::sieve_multithreaded_arc_interruptible;
+use crate::move_box_vec::sieve_multithreaded_2;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::Instant;
@@ -39,7 +39,7 @@ fn divisible_by_any_interruptible(
     false
 }
 
-fn test_primes_seive<F>(calc: F)
+fn test_primes_sieve<F>(calc: F)
 where
     F: Fn(i32) -> Vec<i32>,
 {
@@ -55,26 +55,26 @@ where
 }
 
 fn main() {
-    test_primes_seive(seive_single_threaded);
-    test_primes_seive(seive_multithreaded_1);
+    test_primes_sieve(sieve_single_threaded);
+    test_primes_sieve(sieve_multithreaded_1);
     println!("check 2");
-    test_primes_seive(seive_multithreaded_2);
+    test_primes_sieve(sieve_multithreaded_2);
     println!("check 3");
-    test_primes_seive(seive_multithreaded_arc_interruptible);
+    test_primes_sieve(sieve_multithreaded_arc_interruptible);
 
     if true {
         let end = 100_000;
         {
             let start = Instant::now();
 
-            let primes = seive_multithreaded_1(end);
+            let primes = sieve_multithreaded_1(end);
             let elapsed = start.elapsed();
             println!("{} primes; last={}", primes.len(), primes.last().unwrap());
             println!("MT1 elapsed = {:?}", elapsed);
         }
         {
             let start = Instant::now();
-            let primes = seive_multithreaded_arc_interruptible(end);
+            let primes = sieve_multithreaded_arc_interruptible(end);
             let elapsed = start.elapsed();
             println!("{} primes; last={}", primes.len(), primes.last().unwrap());
             println!("MTAI elapsed = {:?}", elapsed);
@@ -114,7 +114,7 @@ where
     interleaved
 }
 
-fn seive_single_threaded(max_to_check: i32) -> Vec<i32> {
+fn sieve_single_threaded(max_to_check: i32) -> Vec<i32> {
     let mut primes = vec![2];
     for i in 3..max_to_check {
         if !divisible_by_any(i, &primes) {
